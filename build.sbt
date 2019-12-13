@@ -6,7 +6,10 @@ lazy val root = (project in file("."))
     version := "1.0",
     scalaVersion := "2.12.9",
     retrieveManaged := true,
-    libraryDependencies += "io.github.mkotsur" %% "aws-lambda-scala" % "0.1.1"
+    libraryDependencies ++= Seq(
+      "io.github.howardjohn" %% "http4s-lambda" % "0.4.0",
+      "org.http4s" %% "http4s-dsl" % "0.21.0-M6"
+    )
   )
 
 assemblyMergeStrategy in assembly := {
