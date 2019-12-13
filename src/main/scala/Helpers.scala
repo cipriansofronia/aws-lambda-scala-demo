@@ -1,8 +1,7 @@
 import com.redis.RedisClient
 import org.joda.time.DateTime
 import com.github.tototoshi.csv._
-
-case class Response(prefix: String, price: BigDecimal, from: String, initial: Int, increment: Int)
+import io.circe.{Encoder, Json}
 
 case class Rule(prefix: String, price: BigDecimal, initial: Int, increment: Int, startDate: DateTime)
 
@@ -42,6 +41,21 @@ object Helpers {
 
   def bestRowFromRedis(redis: RedisClient, phoneNumber: String, time: DateTime) =
     bestRow(matchString(redis, phoneNumber), time)
+
+  implicit val encodeFoo: Encoder[Res] = new Encoder[Res] {
+    final def apply(a: Res): Json = a match {
+      case ErrorOut(m) => Json.obj(("message", Json.fromString(m)))
+      case o: Out => Json.obj(
+        ("calling", Json.fromString(o.calling)),
+        ("start", Json.fromString(o.start)),
+        ("called", Json.fromString(o.called)),
+        ("cost", Json.fromBigDecimal(o.cost)),
+        ("duration", Json.fromInt(o.duration)),
+        ("price", Json.fromBigDecimal(o.price)),
+        ("rounded", Json.fromInt(o.rounded))
+      )
+    }
+  }
 
 }
 
