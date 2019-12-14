@@ -31,18 +31,22 @@ class LambdaApp extends Lambda[ProxyRequest[In], ProxyResponse[Res]] {
   val table: Table[Out] = Table[Out](tableName)
 
   def computeCosts(in: In): Option[Out] = {
-    bestRowFromRedis(redis, in.calling, DateTime.parse(in.start)).map { r =>
-      Out(
-        calling = in.calling,
-        startDate = DateTime.parse(in.start),
-        endDate = DateTime.parse(in.start).plusSeconds(in.duration),
-        called = in.called,
-        cost = callCost(in, r),
-        duration = in.duration,
-        price = r.price,
-        rounded = Math.round(r.price.toDouble).toInt
-      )
-    }
+    val start = DateTime.parse(in.start)
+    for {
+      _ <- if (in.calling.exists(!_.isDigit)) None else Some(in)
+      _ <- if (in.called.exists(!_.isDigit)) None else Some(in)
+      _ <- if (in.duration < 0) None else Some(in)
+      r <- bestRowFromRedis(redis, in.calling, start)
+    } yield Out(
+      calling = in.calling,
+      startDate = start,
+      endDate = start.plusSeconds(in.duration),
+      called = in.called,
+      cost = callCost(in, r),
+      duration = in.duration,
+      price = r.price,
+      rounded = Math.round(r.price.toDouble).toInt
+    )
   }
 
   override def handle(in: ProxyRequest[In], context: Context): Either[Throwable, ProxyResponse[Res]] =
@@ -57,7 +61,7 @@ class LambdaApp extends Lambda[ProxyRequest[In], ProxyResponse[Res]] {
       }
     } catch {
       case t: Throwable =>
-        Right(ProxyResponse(400, contenttype, Some(ErrorOut(t.getMessage))))
+        Right(ProxyResponse(500, contenttype, Some(ErrorOut(t.getMessage))))
     }
 
 }

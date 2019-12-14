@@ -42,7 +42,7 @@ object Helpers {
   def bestRowFromRedis(redis: RedisClient, phoneNumber: String, time: DateTime): Option[Rule] =
     bestRow(matchString(redis, phoneNumber), time)
 
-  implicit val encodeFoo: Encoder[Res] = new Encoder[Res] {
+  implicit val encodeRes: Encoder[Res] = new Encoder[Res] {
     final def apply(a: Res): Json = a match {
       case ErrorOut(m) => Json.obj(("message", Json.fromString(m)))
       case o: Out => Json.obj(
@@ -50,7 +50,7 @@ object Helpers {
         ("start", Json.fromString(o.startDate.toString)),
         ("called", Json.fromString(o.called)),
         ("cost", Json.fromBigDecimal(o.cost)),
-        ("duration", Json.fromInt(o.duration)),
+        ("duration", Json.fromString(o.duration.toString)),
         ("price", Json.fromBigDecimal(o.price)),
         ("rounded", Json.fromInt(o.rounded))
       )
@@ -65,6 +65,7 @@ object CostsHelper {
   def effectiveDuration(in: In, r: Rule): Double =
     Math.ceil((r.initial + in.duration) / r.increment) * r.increment
 
-  def callCost(in: In, r: Rule): BigDecimal = effectiveDuration(in, r) * (r.price / 60)
+  def callCost(in: In, r: Rule): BigDecimal =
+    (effectiveDuration(in, r) * (r.price / 60)).setScale(2, BigDecimal.RoundingMode.HALF_UP)
 
 }
