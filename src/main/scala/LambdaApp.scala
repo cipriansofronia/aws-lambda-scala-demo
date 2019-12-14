@@ -17,7 +17,7 @@ import org.joda.time.DateTime
 case class In(calling: String, called: String, start: String, duration: Int)
 sealed trait Res
 case class ErrorOut(message: String) extends Res
-case class Out(calling: String, start: DateTime, end: DateTime, called: String, cost: BigDecimal, duration: Int, price: BigDecimal, rounded: Int) extends Res
+case class Out(calling: String, startDate: DateTime, endDate: DateTime, called: String, cost: BigDecimal, duration: Int, price: BigDecimal, rounded: Int) extends Res
 
 class LambdaApp extends Lambda[ProxyRequest[In], ProxyResponse[Res]] {
 
@@ -34,8 +34,8 @@ class LambdaApp extends Lambda[ProxyRequest[In], ProxyResponse[Res]] {
     bestRowFromRedis(redis, in.calling, DateTime.parse(in.start)).map { r =>
       Out(
         calling = in.calling,
-        start = DateTime.parse(in.start),
-        end = DateTime.parse(in.start).plusSeconds(in.duration),
+        startDate = DateTime.parse(in.start),
+        endDate = DateTime.parse(in.start).plusSeconds(in.duration),
         called = in.called,
         cost = callCost(in, r),
         duration = in.duration,
