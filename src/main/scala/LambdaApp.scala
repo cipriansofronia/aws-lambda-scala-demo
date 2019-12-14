@@ -30,7 +30,7 @@ class LambdaApp extends Lambda[ProxyRequest[In], ProxyResponse[Res]] {
   val scanamo = Scanamo(client)
   val table: Table[Out] = Table[Out](tableName)
 
-  def computeCosts(in: In): Option[Out] = {
+  def computeCosts(in: In) = {
     val start = DateTime.parse(in.start)
     for {
       _ <- if (in.calling.exists(!_.isDigit)) None else Some(in)

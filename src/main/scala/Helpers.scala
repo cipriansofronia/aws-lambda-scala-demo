@@ -3,6 +3,8 @@ import org.joda.time.DateTime
 import com.github.tototoshi.csv._
 import io.circe.{Encoder, Json}
 
+import scala.math.BigDecimal.RoundingMode
+
 case class Rule(prefix: String, price: BigDecimal, initial: Int, increment: Int, startDate: DateTime)
 
 object Helpers {
@@ -62,10 +64,10 @@ object Helpers {
 
 object CostsHelper {
 
-  def effectiveDuration(in: In, r: Rule): Double =
-    Math.ceil((r.initial + in.duration) / r.increment) * r.increment
+  def effectiveDuration(in: In, r: Rule): BigDecimal =
+    BigDecimal((r.initial + in.duration).toDouble / r.increment.toDouble).setScale(0, RoundingMode.CEILING) * r.increment
 
   def callCost(in: In, r: Rule): BigDecimal =
-    (effectiveDuration(in, r) * (r.price / 60)).setScale(2, BigDecimal.RoundingMode.HALF_UP)
+    (effectiveDuration(in, r) * (r.price / 60.0)).setScale(2, BigDecimal.RoundingMode.HALF_UP)
 
 }
