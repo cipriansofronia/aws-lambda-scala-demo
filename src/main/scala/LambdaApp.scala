@@ -16,7 +16,7 @@ import org.joda.time.DateTime
 case class In(calling: String, called: String, start: String, duration: Int)
 sealed trait Res
 case class ErrorOut(message: String) extends Res
-case class Out(calling: String, start: String, called: String, cost: BigDecimal, duration: Int, price: BigDecimal, rounded: Int) extends Res
+case class Out(calling: String, start: String, end: String, called: String, cost: BigDecimal, duration: Int, price: BigDecimal, rounded: Int) extends Res
 
 class LambdaApp extends Lambda[ProxyRequest[In], ProxyResponse[Res]] {
 
@@ -34,6 +34,7 @@ class LambdaApp extends Lambda[ProxyRequest[In], ProxyResponse[Res]] {
       Out(
         calling = in.calling,
         start = in.start,
+        end = DateTime.parse(in.start).plusSeconds(in.duration).toString,
         called = in.called,
         cost = callCost(in, r),
         duration = in.duration,

@@ -48,6 +48,7 @@ object Helpers {
       case o: Out => Json.obj(
         ("calling", Json.fromString(o.calling)),
         ("start", Json.fromString(o.start)),
+        ("end", Json.fromString(o.end)),
         ("called", Json.fromString(o.called)),
         ("cost", Json.fromBigDecimal(o.cost)),
         ("duration", Json.fromInt(o.duration)),
@@ -63,7 +64,7 @@ object Helpers {
 object CostsHelper {
 
   def effectiveDuration(in: In, r: Rule): Double =
-    Math.ceil((r.increment + in.duration) / r.increment) * r.increment
+    Math.ceil((r.initial + in.duration) / r.increment) * r.increment
 
   def callCost(in: In, r: Rule): BigDecimal = effectiveDuration(in, r) * (r.price / 60)
 
