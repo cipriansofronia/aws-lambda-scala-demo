@@ -13,7 +13,7 @@ object Helpers {
     def matchRedis(lst: Seq[String]): Seq[Rule] = {
       if (lst.isEmpty) Nil
       else {
-        redis.lrange(lst.head, 0, 1) match {
+        redis.lrange(lst.head, 0, -1) match {
           case None | Some(Nil) => matchRedis(lst.tail)
           case Some(r) => r.collect {
             case Some(x) =>
@@ -32,14 +32,14 @@ object Helpers {
   }
 
   private def bestRow(lst: Seq[Rule], time: DateTime): Option[Rule] = {
-    lst.filter(r => r.startDate.compareTo(time) < 0) match {
+    lst.filter(r => r.startDate.compareTo(time) <= 0) match {
       case Nil => None
       case x :: Nil => Some(x)
       case x => Some(x.maxBy(_.startDate))
     }
   }
 
-  def bestRowFromRedis(redis: RedisClient, phoneNumber: String, time: DateTime) =
+  def bestRowFromRedis(redis: RedisClient, phoneNumber: String, time: DateTime): Option[Rule] =
     bestRow(matchString(redis, phoneNumber), time)
 
   implicit val encodeFoo: Encoder[Res] = new Encoder[Res] {

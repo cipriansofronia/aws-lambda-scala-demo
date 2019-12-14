@@ -8,11 +8,10 @@ lazy val root = (project in file("."))
     retrieveManaged := true,
     libraryDependencies ++= Seq(
       "io.github.mkotsur" %% "aws-lambda-scala" % "0.1.1",
-      "org.scanamo" %% "scanamo" % "1.0.0-M10",
+      "org.scanamo" %% "scanamo" % "1.0.0-M11",
       "org.scanamo" %% "scanamo-joda" % "1.0.0-M11",
       "net.debasishg" %% "redisclient" % "3.20",
       "com.github.tototoshi" %% "scala-csv" % "1.3.6"
-      //"io.circe" %% "circe-generic-extras" % "0.12.2"
     )
   )
 
