@@ -1,4 +1,4 @@
-import com.amazonaws.services.dynamodbv2.{AmazonDynamoDB, AmazonDynamoDBAsyncClient, AmazonDynamoDBClient}
+import com.amazonaws.services.dynamodbv2.{AmazonDynamoDB, AmazonDynamoDBAsyncClient}
 import io.circe.generic.auto._
 import io.github.mkotsur.aws.handler.Lambda._
 import io.github.mkotsur.aws.handler.Lambda
@@ -6,6 +6,7 @@ import com.amazonaws.services.lambda.runtime.Context
 import org.scanamo._
 import org.scanamo.syntax._
 import org.scanamo.auto._
+import org.scanamo.joda.JodaFormats._
 import Helpers._
 import CostsHelper._
 import com.redis.RedisClient
@@ -16,7 +17,7 @@ import org.joda.time.DateTime
 case class In(calling: String, called: String, start: String, duration: Int)
 sealed trait Res
 case class ErrorOut(message: String) extends Res
-case class Out(calling: String, start: String, end: String, called: String, cost: BigDecimal, duration: Int, price: BigDecimal, rounded: Int) extends Res
+case class Out(calling: String, start: DateTime, end: DateTime, called: String, cost: BigDecimal, duration: Int, price: BigDecimal, rounded: Int) extends Res
 
 class LambdaApp extends Lambda[ProxyRequest[In], ProxyResponse[Res]] {
 
@@ -33,8 +34,8 @@ class LambdaApp extends Lambda[ProxyRequest[In], ProxyResponse[Res]] {
     bestRowFromRedis(redis, in.calling, DateTime.parse(in.start)).map { r =>
       Out(
         calling = in.calling,
-        start = in.start,
-        end = DateTime.parse(in.start).plusSeconds(in.duration).toString,
+        start = DateTime.parse(in.start),
+        end = DateTime.parse(in.start).plusSeconds(in.duration),
         called = in.called,
         cost = callCost(in, r),
         duration = in.duration,
